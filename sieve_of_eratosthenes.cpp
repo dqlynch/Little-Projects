@@ -45,6 +45,8 @@ int main () {
     print_primes(print_pref, sieve, n);
     cout << "time taken: " << duration << "s";
     cout << " (doesn't include printing time)" << endl;
+
+    delete[] sieve;
 }
 
 // FUNCTIONS
