@@ -1,7 +1,7 @@
 //  Dylan Lynch
 //  11/9/15
-//  MY FIRST C++ PROGRAM!
-//  guessgame.cpp
+//  My first ever C++ program
+//  please ignore everything wrong with it
 //  game to guess a number between 0 and 100
 
 
