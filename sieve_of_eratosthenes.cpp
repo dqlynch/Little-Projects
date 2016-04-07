@@ -39,6 +39,8 @@ void find_primes(const long long max) {
         print_last = true;
     }
 
+    cout << "running..." << flush;
+
     // Start timer
     clock_t start = clock();
 
@@ -70,6 +72,7 @@ void find_primes(const long long max) {
     // Stop timer (don't want to count printing time)
     double duration = (clock() - start) / ((double) CLOCKS_PER_SEC);
 
+    cout << endl;
     if (print_request) {
         // Print primes
         cout << "Printing primes up to " << max << ":" << endl;
