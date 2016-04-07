@@ -10,9 +10,17 @@
 
 using namespace std;
 
+// MODIFIES:    cout
+int ask_print_preferences();
+
 // REQUIRES:    n >= 2
 // EFFECTS:     finds and prints primes up to n
 bool* sieve_of_e(const long long max);
+
+// EFFECTS:     Prints either all primes up to n or the last prime below n or
+//              the number of primes below n
+// MODIFIES:    cout
+void print_primes(const int &print_pref, const bool* sieve, const int &n);
 
 int main () {
     // Ask for a number
@@ -20,19 +28,7 @@ int main () {
     cout << "Find primes up to: ";
     cin >> n;
 
-
-    // Ask if user wants to print primes
-    bool print_request = false;
-    bool print_last = false;
-    string input;
-    cout << "Print primes? (y/last/n): ";
-    cin >> input;
-    if (input == "y") {
-        print_request = true;
-    }
-    else if (input == "last") {
-        print_last = true;
-    }
+    int print_pref = ask_print_preferences();
 
     cout << "running..." << flush;
 
@@ -40,35 +36,34 @@ int main () {
     clock_t start = clock();
 
     // Find primes up to that number
-    bool* sieve = find_primes(n);
+    bool* sieve = sieve_of_e(n);
 
     // Stop timer (don't want to count printing time)
     double duration = (clock() - start) / ((double) CLOCKS_PER_SEC);
 
     cout << endl;
-    if (print_request) {
-        // Print primes
-        cout << "Printing primes up to " << n << ":" << endl;
-        for (int i = 0; i < n; ++i) {
-            if (sieve[i] == false) {
-                // Number is prime
-                cout << i << endl;
-            }
-        }
-    }
-    else if (print_last) {
-        // Print last prime
-        cout << "Last prime: ";
-        for (int i = n; i >= 0; --i) {
-            if (sieve[i] == false) {
-                cout << i << endl;
-                break;
-            }
-        }
-    }
-
+    print_primes(print_pref, sieve, n);
     cout << "time taken: " << duration << "s";
     cout << " (doesn't include printing time)" << endl;
+}
+
+// FUNCTIONS
+int ask_print_preferences() {
+    // Ask if user wants to print primes
+    // 0 = n, 1 = y, 2 = last, 3 = count
+    string input;
+    cout << "Print primes? (y/n/last/count): ";
+    cin >> input;
+    if (input == "y") {
+        return 1;
+    }
+    else if (input == "last") {
+        return 2;
+    }
+    else if (input == "count") {
+        return 3;
+    }
+    return 0;
 }
 
 bool* sieve_of_e(const long long max) {
@@ -97,4 +92,38 @@ bool* sieve_of_e(const long long max) {
         }
     }
     return sieve;
+}
+
+void print_primes(const int &print_pref, const bool* sieve, const int &n) {
+    // 0 = n, 1 = y, 2 = last, 3 = count
+    if (print_pref == 1) {
+        // Print primes
+        cout << "Printing primes up to " << n << ":" << endl;
+        for (int i = 0; i < n; ++i) {
+            if (sieve[i] == false) {
+                // Number is prime
+                cout << i << endl;
+            }
+        }
+    }
+    else if (print_pref == 2) {
+        // Print last prime
+        cout << "Last prime: ";
+        for (int i = n; i >= 0; --i) {
+            if (sieve[i] == false) {
+                cout << i << endl;
+                break;
+            }
+        }
+    }
+    else if (print_pref == 3) {
+        // Count primes
+        int count = 0;
+        for (int i = 0; i < n + 1; ++i) {
+            if (sieve[i] == false) {
+                ++count;
+            }
+        }
+        cout << "Number of primes below " << n << ": " << count << endl;
+    }
 }
