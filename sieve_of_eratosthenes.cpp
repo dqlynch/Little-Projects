@@ -6,13 +6,13 @@
 #include <iostream>
 #include <cmath>
 #include <ctime>
-#include <ctype.h>
+#include <string>
 
 using namespace std;
 
 // REQUIRES:    n >= 2
 // EFFECTS:     finds and prints primes up to n
-void find_primes(const long long max, bool print_request);
+void find_primes(const long long max);
 
 int main () {
     // Ask for a number
@@ -20,20 +20,25 @@ int main () {
     cout << "Find primes up to: ";
     cin >> n;
 
-    // Ask if user wants to print primes
-    bool print_request = false;
-    char input;
-    cout << "Print primes? (y/n): ";
-    cin >> input;
-    if (tolower(input) == 'y') {
-        print_request = true;
-    }
-
     // Find primes up to that number
-    find_primes(n, print_request);
+    find_primes(n);
 }
 
-void find_primes(const long long max, bool print_request) {
+void find_primes(const long long max) {
+
+    // Ask if user wants to print primes
+    bool print_request = false;
+    bool print_last = false;
+    string input;
+    cout << "Print primes? (y/last/n): ";
+    cin >> input;
+    if (input == "y") {
+        print_request = true;
+    }
+    else if (input == "last") {
+        print_last = true;
+    }
+
     // Start timer
     clock_t start = clock();
 
@@ -75,9 +80,19 @@ void find_primes(const long long max, bool print_request) {
             }
         }
     }
+    else if (print_last) {
+        // Print last prime
+        cout << "Last prime: ";
+        for (int i = max; i >= 0; --i) {
+            if (sieve[i] == false) {
+                cout << i << endl;
+                break;
+            }
+        }
+    }
 
-    cout << "time taken: " << duration << "s" << endl;
-    cout << "(doesn't include printing time)" << endl;
+    cout << "time taken: " << duration << "s";
+    cout << " (doesn't include printing time)" << endl;
 
     delete[] sieve;
 }
