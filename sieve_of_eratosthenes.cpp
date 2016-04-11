@@ -104,7 +104,7 @@ void print_primes(const int &print_pref, const bool* sieve, const int &n) {
         for (int i = 0; i < n; ++i) {
             if (sieve[i] == false) {
                 // Number is prime
-                cout << i << endl;
+                printf("%d\n",i);
             }
         }
     }
