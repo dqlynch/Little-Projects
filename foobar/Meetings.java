@@ -1,6 +1,5 @@
 // Dylan Lynch
 // 4/12/2016
-// foo.bar challenge 2
 
 // Uses tree recursion to solve. Too slow for this problem, but fun
 // implementation. Sort of a hybrid of knapsack problem and sieve.
@@ -10,7 +9,7 @@
 
 import java.util.Arrays;
 
-public class zombits {
+public class Meetings {
 
   public static void main(String args[]) {
     // Test answer function

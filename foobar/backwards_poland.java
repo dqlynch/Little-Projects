@@ -1,6 +1,5 @@
 // Dylan Lynch
 // 4/10/16
-// foo.bar challenge 1
 
 // Turns an inline expression into the lexicographically largest postfix
 // expression representing the same thing
