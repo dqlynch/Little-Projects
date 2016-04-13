@@ -8,7 +8,7 @@
 
 import java.util.Scanner;
 
-public class rusty_calculator {
+public class backwards_poland {
 
   public static void main(String args[]) {
     // Test answer()
