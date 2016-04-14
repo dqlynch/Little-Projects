@@ -1,3 +1,3 @@
 # Little-Projects
-
-Just some mathy side projects
+Small side projects
+coding challenges, mathy stuff, random ideas, etc.
