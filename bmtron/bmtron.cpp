@@ -115,19 +115,17 @@ void run_game() {
 
   int loser = 0;
   while(loser == 0) {
-
     game_frame(player1, p1direction, player2, p2direction);
+    loser = check_collisions(player1, player2);
+    if (loser == 0) {
+      loser = check_collisions(player2, player1);
+    }
   }
   if (!play_again(loser)) {
     return;
   }
   else {
     run_game();
-  }
-
-  loser = check_collisions(player1, player2);
-  if (loser == 0) {
-    loser = check_collisions(player2, player1);
   }
 }
 
