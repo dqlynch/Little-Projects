@@ -2,7 +2,6 @@
 #include <cmath>
 #include <stdlib.h>
 #include <ncurses.h>
-#include <unistd.h>   // sleep
 #include <ctime>
 #include <list>
 
@@ -69,17 +68,22 @@ int main() {
 // FUNCTION IMPLEMENTATIONS - - - - - - - - - - - - - - - - - - - -
 
 void run_game() {
-  // 0 = up, clockwise to 3 = left
-  int direction = 1;
+
 
   std::list<Coords> snake_list;
   for (int i = 0; i < STARTING_LENGTH + 1; ++i) {
-    Coords link = {1 + i, 1, '#'};
+    Coords link = {1 + i, MAX_BOARD_Y / 2, '#'};
     snake_list.push_back(link);
   }
 
   clear();
   print_board();
+  set_name(snake_list);
+  print_snake(snake_list);
+
+  // Wait for initial direction input
+  int direction = 3;
+  while(!get_dir(direction));
 
   while(!check_collisions(snake_list)) {
     game_frame(snake_list, direction);
@@ -280,5 +284,5 @@ void init_ncurses() {
   nodelay(stdscr, TRUE);  // getch can't block clock
   keypad(stdscr, TRUE);
   scrollok(stdscr, TRUE);
-  // resizeterm(MAX_BOARD_Y + 10, 2 * MAX_BOARD_X + 10);
+  resizeterm(MAX_BOARD_Y + 10, 2 * MAX_BOARD_X + 10);
 }
