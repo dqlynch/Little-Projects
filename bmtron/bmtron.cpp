@@ -15,7 +15,7 @@
 int CONTROLS[2][4] = {{'w', 'a', 's', 'd'},                      // player 1
                       {KEY_UP, KEY_LEFT, KEY_DOWN, KEY_RIGHT}};  // player 2
 
-static const int MAX_BOARD_X = 70;
+static const int MAX_BOARD_X = 50;
 static const int MAX_BOARD_Y = 50;
 static const double FRAMES_PER_SEC = 15;
 static const int STARTING_LENGTH = 1;  // must be < MAX_BOARD_X - 1
@@ -115,10 +115,6 @@ void run_game() {
 
   int loser = 0;
   while(loser == 0) {
-    loser = check_collisions(player1, player2);
-    if (loser == 0) {
-      loser = check_collisions(player2, player1);
-    }
 
     game_frame(player1, p1direction, player2, p2direction);
   }
@@ -127,6 +123,11 @@ void run_game() {
   }
   else {
     run_game();
+  }
+
+  loser = check_collisions(player1, player2);
+  if (loser == 0) {
+    loser = check_collisions(player2, player1);
   }
 }
 
