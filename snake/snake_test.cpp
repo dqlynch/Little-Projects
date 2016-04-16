@@ -10,9 +10,10 @@
 // WILL NOT WORK ON WINDOWS
 // REQUIRES NCURSES LIBRARY
 
-static const int MAX_BOARD_COORD = 30;
+static const int MAX_BOARD_X = 50;
+static const int MAX_BOARD_Y = 30;
 static const double FRAMES_PER_SEC = 20;
-static const int STARTING_LENGTH = 15;  // must be >= 5
+static const int STARTING_LENGTH = 10;  // must be >= 5
 
 struct Coords {
   int x;
@@ -64,7 +65,7 @@ int main() {
   snake_list.push_back(link3);
   snake_list.push_back(link2);
   snake_list.push_back(link1);
-  for (int i = 0; i < STARTING_LENGTH; ++i) {
+  for (int i = 0; i < STARTING_LENGTH - 5; ++i) {
     snake_list.push_back(link0);
   }
 
@@ -126,7 +127,7 @@ void moveSnek(std::list<Coords>& snake_list, int direction) {
     return;
   }
   else if (direction == 1) {
-    if (coords.x < MAX_BOARD_COORD) {
+    if (coords.x < MAX_BOARD_X) {
       ++coords.x;
       snake_list.push_back(coords);
       snake_list.pop_front();
@@ -134,7 +135,7 @@ void moveSnek(std::list<Coords>& snake_list, int direction) {
     return;
   }
   else if (direction == 2) {
-    if (coords.y < MAX_BOARD_COORD) {
+    if (coords.y < MAX_BOARD_Y) {
       ++coords.y;
       snake_list.push_back(coords);
       snake_list.pop_front();
@@ -152,26 +153,13 @@ void moveSnek(std::list<Coords>& snake_list, int direction) {
 }
 
 void printBoard(std::list<Coords>& snake_list) {
-  system("clear");
-  for (int row = 0; row <= MAX_BOARD_COORD; ++row) {
-    for (int col = 0; col <= MAX_BOARD_COORD; ++col) {
-
-      bool snek_found = false;
-      std::list<Coords>::iterator itend = snake_list.end();
-      for (std::list<Coords>::iterator it = snake_list.begin(); it != itend; ++it) {
-        if ((*it).x == col && (*it).y == row) {
-          printf("%c  ", (*it).symbol);
-          snek_found = true;
-          break;
-        }
-      }
-      if (!snek_found) {
-        printf("   ");
-      }
-    }
-    printf("\r\n");
+  clear();
+  for (std::list<Coords>::iterator it = snake_list.begin();
+       it != snake_list.end();
+       ++it) {
+    mvprintw(it->y, 2 * it->x, "%c", it->symbol);
   }
-  printf("%d,%d\r",snake_list.back().x, snake_list.back().y);
+  mvprintw(MAX_BOARD_Y + 1, 0, "%d,%d\r",snake_list.back().x, snake_list.back().y);
   refresh();
 }
 
