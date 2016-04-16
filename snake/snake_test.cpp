@@ -13,7 +13,7 @@
 static const int MAX_BOARD_X = 50;
 static const int MAX_BOARD_Y = 30;
 static const double FRAMES_PER_SEC = 20;
-static const int STARTING_LENGTH = 10;  // must be >= 5
+static const int STARTING_LENGTH = 20;  // must be < MAX_BOARD_X - 1
 
 struct Coords {
   int x;
@@ -21,78 +21,165 @@ struct Coords {
   char symbol;
 };
 
-// Waits for one frame cycle, accepts up to one direction change throughout
-void gameFrame(int& direction);
+// Runs game
+void run_game();
+
+// Asks player whether they want to play again or exits game
+bool play_again();
+
+// Prints the board borders
+void print_board();
+
+// Checks whether snek has collided into anything
+bool check_collisions(const std::list<Coords>& snake_list);
+
+// Executes one game frame
+void game_frame(std::list<Coords>& snake_list, int& direction);
 
 // Change direction of snake, can't change to opposite
-bool getDir(int& direction);
+bool get_dir(int& direction);
 
 // Increments snake position according to dircetion
-void moveSnek(std::list<Coords>& snake_list, int direction);
+void move_snek(std::list<Coords>& snake_list, int direction);
 
-// Prints current snake pos
-void printBoard(std::list<Coords>& snake_list);
+// Prints current snake position
+void print_snake(const std::list<Coords>& snake_list);
 
-// Sets name of snake
-void setName(std::list<Coords>& snake_list);
+// Print prompt
+void print_prompt();
+
+// Sets last 5 characters of snake + eraser on the tail
+void set_name(std::list<Coords>& snake_list);
 
 // Checks for user keyboard hit (req if getch is nonblocking)
 bool kbhit();
 
+// Init all the ncurses specific stuff
+void init_ncurses();
+
 int main() {
+  init_ncurses();
 
-  initscr();
-  curs_set(0);
-  cbreak();
-  noecho();
-  nodelay(stdscr, TRUE);  // getch can't block clock
-  keypad(stdscr, TRUE);
-  scrollok(stdscr, TRUE);
+  run_game();
 
+  // End game here TODO
+  endwin();
+}
+
+// FUNCTION IMPLEMENTATIONS - - - - - - - - - - - - - - - - - - - -
+
+void run_game() {
   // 0 = up, clockwise to 3 = left
   int direction = 1;
 
-  Coords link0 = {0, 0, 'S'};
-  Coords link1 = {0, 0, 'S'};
-  Coords link2 = {1, 0, 'N'};
-  Coords link3 = {2, 0, 'A'};
-  Coords link4 = {3, 0, 'K'};
-  Coords link5 = {4, 0, 'E'};
-
-  std::list<Coords> snake_list = std::list<Coords>();
-  snake_list.push_back(link5);
-  snake_list.push_back(link4);
-  snake_list.push_back(link3);
-  snake_list.push_back(link2);
-  snake_list.push_back(link1);
-  for (int i = 0; i < STARTING_LENGTH - 5; ++i) {
-    snake_list.push_back(link0);
+  std::list<Coords> snake_list;
+  for (int i = 0; i < STARTING_LENGTH + 1; ++i) {
+    Coords link = {1 + i, 1, '#'};
+    snake_list.push_back(link);
   }
 
-  printBoard(snake_list);
+  clear();
+  print_board();
 
-  while(1) {
-    moveSnek(snake_list, direction);
-    setName(snake_list);
-    printBoard(snake_list);
-    gameFrame(direction);
+  while(!check_collisions(snake_list)) {
+    game_frame(snake_list, direction);
+  }
+  if (!play_again()) {
+    return;
+  }
+  else {
+    run_game();
   }
 }
 
-void gameFrame(int& direction) {
-  clock_t start = clock();
-  bool changed = false;
-  while( ((clock()-start) / (double) CLOCKS_PER_SEC) < (1 / FRAMES_PER_SEC)) {
-    if (!changed) {
-      if (getDir(direction)) {
-        changed = true;
-      }
+bool play_again() {
+  print_prompt();
+  mvprintw(MAX_BOARD_Y / 2, MAX_BOARD_X - 5, "Play again?");
+  mvprintw(MAX_BOARD_Y / 2 + 1, MAX_BOARD_X - 2, "(y/n)");
+
+  while (1) {
+    char input = 0;
+    if (kbhit()) {
+      input = getch();
+    }
+
+    if (input == 'y' || input == 'Y') {
+      return true;
+    }
+    if (input == 'n' || input == 'N') {
+      return false;
     }
   }
 }
 
-bool getDir(int& direction) {
+void print_board() {
+  for (int col = 1; col < 2 * MAX_BOARD_X; ++col) {
+    mvprintw(0, col, "-");
+    mvprintw(MAX_BOARD_Y, col, "-");
+  }
+
+  for (int row = 1; row < MAX_BOARD_Y; ++row) {
+    mvprintw(row, 0, "|");
+    mvprintw(row, 2 * MAX_BOARD_X, "|");
+  }
+}
+
+void print_prompt() {
+  int halfx = MAX_BOARD_X;
+  int halfy = MAX_BOARD_Y / 2;
+  for (int i = halfx - 19; i <= halfx + 19; ++i) {
+    for (int j = halfy - 4; j <= halfy + 4; ++j) {
+      mvprintw(j, i, " ");
+    }
+  }
+  for (int i = halfx - 19; i <= halfx + 19; ++i) {
+    mvprintw(halfy - 5, i, "_");
+    mvprintw(halfy + 5, i, "-");
+  }
+  for (int i = halfy - 4; i <= halfy + 4; ++i) {
+    mvprintw(i, halfx - 20, "|");
+    mvprintw(i, halfx + 20, "|");
+  }
+}
+
+bool check_collisions(const std::list<Coords>& snake_list) {
+  // Only need to check head
+  const Coords head = snake_list.back();
+
+  // Check self collisions
+  std::list<Coords>::const_iterator it = snake_list.begin();
+  while (++it != --snake_list.end()) {
+    if (head.x == it->x && head.y == it->y) {
+      return true;
+    }
+  }
+  // Check wall check_collisions
+  if (head.x == 0 || head.x == MAX_BOARD_X ||
+      head.y == 0 || head.y == MAX_BOARD_Y) {
+    return true;
+  }
+  return false;
+}
+
+void game_frame(std::list<Coords>& snake_list, int& direction) {
+  // Wait and accept up to 1 direction change
+  clock_t start = clock();
+  bool changed = false;
+  while( ((clock()-start) / (double) CLOCKS_PER_SEC) < (1 / FRAMES_PER_SEC)) {
+    if (!changed) {
+      if (get_dir(direction)) {
+        changed = true;
+      }
+    }
+  }
+  move_snek(snake_list, direction);
+  set_name(snake_list);
+  print_snake(snake_list);
+}
+
+bool get_dir(int& direction) {
   int input = 0;
+  // Only get char if keyboard is hit
   if (kbhit()) {
     input = getch();
   }
@@ -115,7 +202,7 @@ bool getDir(int& direction) {
   return false;
 }
 
-void moveSnek(std::list<Coords>& snake_list, int direction) {
+void move_snek(std::list<Coords>& snake_list, int direction) {
   Coords coords = {snake_list.back().x, snake_list.back().y, 'S'};
 
   if (direction == 3) {
@@ -152,33 +239,46 @@ void moveSnek(std::list<Coords>& snake_list, int direction) {
   }
 }
 
-void printBoard(std::list<Coords>& snake_list) {
-  clear();
-  for (std::list<Coords>::iterator it = snake_list.begin();
+void print_snake(const std::list<Coords>& snake_list) {
+  for (std::list<Coords>::const_iterator it = snake_list.begin();
        it != snake_list.end();
        ++it) {
     mvprintw(it->y, 2 * it->x, "%c", it->symbol);
   }
+
+  // Coords
   mvprintw(MAX_BOARD_Y + 1, 0, "%d,%d\r",snake_list.back().x, snake_list.back().y);
   refresh();
 }
 
-void setName(std::list<Coords>& snake_list) {
+void set_name(std::list<Coords>& snake_list) {
+  // Last character always a space to erase over snake tail
   std::list<Coords>::iterator it = snake_list.begin();
-  (*it).symbol = 'E';
-  (*++it).symbol = 'K';
-  (*++it).symbol = 'A';
-  (*++it).symbol = 'N';
-  (*++it).symbol = 'S';
+  it++->symbol = ' ';  // tail
+  while (it != --snake_list.end()) {
+    it++->symbol = '#';
+  }
+  it->symbol = 'X';  // head
 }
 
 bool kbhit() {
     int ch = getch();
-
     if (ch != ERR) {
         ungetch(ch);
         return true;
-    } else {
+    }
+    else {
         return false;
     }
+}
+
+void init_ncurses() {
+  initscr();
+  curs_set(0);
+  cbreak();
+  noecho();
+  nodelay(stdscr, TRUE);  // getch can't block clock
+  keypad(stdscr, TRUE);
+  scrollok(stdscr, TRUE);
+  // resizeterm(MAX_BOARD_Y + 10, 2 * MAX_BOARD_X + 10);
 }
