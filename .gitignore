@@ -1,7 +1,9 @@
-# Ignore extensionless files
+# Ignore extensionless files (doesn't seem to be working?)
 *
 !*/
 !*.*
+
+*.DS_Store
 
 # Compiled Object files
 *.slo
