@@ -15,9 +15,9 @@
 int CONTROLS[2][4] = {{'w', 'a', 's', 'd'},                      // player 1
                       {KEY_UP, KEY_LEFT, KEY_DOWN, KEY_RIGHT}};  // player 2
 
-static const int MAX_BOARD_X = 50;
+static const int MAX_BOARD_X = 80;
 static const int MAX_BOARD_Y = 50;
-static const double FRAMES_PER_SEC = 15;
+static const double FRAMES_PER_SEC = 30;
 static const int STARTING_LENGTH = 1;  // must be < MAX_BOARD_X - 1
 
 struct Link {
