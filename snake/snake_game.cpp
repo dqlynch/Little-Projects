@@ -82,7 +82,7 @@ void run_game() {
   print_snake(snake_list);
 
   // Wait for initial direction input
-  int direction = 3;
+  int direction = 1;
   while(!get_dir(direction));
 
   while(!check_collisions(snake_list)) {
@@ -171,9 +171,7 @@ void game_frame(std::list<Coords>& snake_list, int& direction) {
   bool changed = false;
   while( ((clock()-start) / (double) CLOCKS_PER_SEC) < (1 / FRAMES_PER_SEC)) {
     if (!changed) {
-      if (get_dir(direction)) {
-        changed = true;
-      }
+      changed = get_dir(direction);
     }
   }
   move_snek(snake_list, direction);
