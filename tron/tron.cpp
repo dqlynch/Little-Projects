@@ -7,7 +7,7 @@
 
 // LINUX/OS X SPECIFIC
 // WILL NOT WORK ON WINDOWS
-// REQUIRES NCURSES LIBRARY
+// USES NCURSES LIBRARY
 
 // Split off of snake base game
 

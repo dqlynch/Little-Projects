@@ -4,13 +4,14 @@
 #include <ncurses.h>
 #include <ctime>
 #include <list>
+#include <sys/ioctl.h>
 
 // LINUX/OS X SPECIFIC
 // WILL NOT WORK ON WINDOWS
 // REQUIRES NCURSES LIBRARY
 
-static const int MAX_BOARD_X = 50;
-static const int MAX_BOARD_Y = 30;
+static int MAX_BOARD_X;
+static int MAX_BOARD_Y;
 static const double FRAMES_PER_SEC = 20;
 static const int STARTING_LENGTH = 20;  // must be < MAX_BOARD_X - 1
 
@@ -19,6 +20,8 @@ struct Coords {
   int y;
   char symbol;
 };
+
+// FORWARD DECLARATIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 // Runs game
 void run_game();
@@ -56,34 +59,44 @@ bool kbhit();
 // Init all the ncurses specific stuff
 void init_ncurses();
 
+// Sets the window size and board size, return true if changed
+bool set_game_size();
+
+// MAIN - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 int main() {
   init_ncurses();
 
   run_game();
 
-  // End game here TODO
   endwin();
 }
 
-// FUNCTION IMPLEMENTATIONS - - - - - - - - - - - - - - - - - - - -
+// FUNCTION IMPLEMENTATIONS - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 void run_game() {
 
+  set_game_size();
 
   std::list<Coords> snake_list;
   for (int i = 0; i < STARTING_LENGTH + 1; ++i) {
     Coords link = {1 + i, MAX_BOARD_Y / 2, '#'};
     snake_list.push_back(link);
   }
-
+  set_name(snake_list);
   clear();
   print_board();
-  set_name(snake_list);
   print_snake(snake_list);
 
   // Wait for initial direction input
   int direction = 1;
-  while(!get_dir(direction));
+  while(!get_dir(direction)) {
+    if (set_game_size()) {
+      clear();
+      print_board();
+      print_snake(snake_list);
+    }
+  }
 
   while(!check_collisions(snake_list)) {
     game_frame(snake_list, direction);
@@ -282,5 +295,23 @@ void init_ncurses() {
   nodelay(stdscr, TRUE);  // getch can't block clock
   keypad(stdscr, TRUE);
   scrollok(stdscr, TRUE);
-  resizeterm(MAX_BOARD_Y + 10, 2 * MAX_BOARD_X + 10);
+}
+
+bool set_game_size() {
+  struct winsize w;
+  ioctl(0, TIOCGWINSZ, &w);
+
+  int y_save = MAX_BOARD_Y;
+  int x_save = MAX_BOARD_X;
+
+  MAX_BOARD_Y = w.ws_row - 1;
+  MAX_BOARD_X = (w.ws_col / 2) - 1;
+
+  if (y_save != MAX_BOARD_Y ||
+      x_save != MAX_BOARD_X) {
+    // Only resize term if window size changed
+    resizeterm(w.ws_row, w.ws_col);
+    return true;
+  }
+  return false;
 }
