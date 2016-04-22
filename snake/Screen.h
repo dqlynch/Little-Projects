@@ -7,6 +7,7 @@
 #include <cmath>
 #include <stdlib.h>
 #include <ncurses.h>
+#include <list>
 #include <sys/ioctl.h>  // for get window size
 
 // Static class to hold board dimensions
@@ -40,5 +41,7 @@ void print_prompt();
 
 // Prints the board borders
 void print_board();
+
+void update_board(std::list<Coords> snake_list);
 
 #endif

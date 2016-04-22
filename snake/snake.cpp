@@ -2,7 +2,7 @@
 #include <ncurses.h>
 #include <list>
 #include "Screen.h"
-#include "Snake_Game.h"
+#include "SnakeGame.h"
 
 // LINUX/OS X SPECIFIC
 // WILL NOT WORK ON WINDOWS
@@ -18,7 +18,6 @@ int GameVars::STARTING_LENGTH = 20;  // must be < MAX_BOARD_X - 1
 // Runs game
 void run_game();
 
-
 // MAIN - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 int main() {
@@ -31,25 +30,17 @@ int main() {
 
 void run_game() {
 
+  // Set up initial gamestate
   set_game_size();
-
-  std::list<Coords> snake_list;
-  for (int i = 0; i < GameVars::STARTING_LENGTH + 1; ++i) {
-    Coords link = {1 + i, ScreenVars::MAX_BOARD_Y / 2, '#'};
-    snake_list.push_back(link);
-  }
-  set_name(snake_list);
-  clear();
-  print_board();
-  print_snake(snake_list);
+  std::list<Coords> snake_list = create_snake();
+  update_board(snake_list);
 
   // Wait for initial direction input
   int direction = 1;
   while(!get_dir(direction)) {
     if (set_game_size()) {
-      clear();
-      print_board();
-      print_snake(snake_list);
+      snake_list = create_snake();
+      update_board(snake_list);
     }
   }
 

@@ -1,6 +1,6 @@
 // Header for snake specific functions
-#ifndef SNAKE_GAME_H
-#define SNAKE_GAME_H
+#ifndef SNAKEGAME_H
+#define SNAKEGAME_H
 
 #include <iostream>
 #include <list>
@@ -25,6 +25,9 @@ bool play_again();
 
 // Change direction of snake, can't change to opposite
 bool get_dir(int& direction);
+
+// Creates a snake based on screen size
+std::list<Coords> create_snake();
 
 // Increments snake position according to dircetion
 void move_snek(std::list<Coords>& snake_list, int direction);

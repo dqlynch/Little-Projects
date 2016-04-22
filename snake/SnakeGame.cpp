@@ -1,5 +1,5 @@
 // Implementation of Snake_Game.h snake-specific functions
-#include "Snake_Game.h"
+#include "SnakeGame.h"
 
 bool check_collisions(const std::list<Coords>& snake_list) {
   // Only need to check head
@@ -24,20 +24,24 @@ void game_frame(std::list<Coords>& snake_list, int& direction) {
   // Wait and accept up to 1 direction change
   clock_t start = clock();
   bool changed = false;
-  while( ((clock()-start) / (double) CLOCKS_PER_SEC) < (1 / GameVars::FRAMES_PER_SEC)) {
+  while( ((clock()-start) /
+          (double) CLOCKS_PER_SEC) < (1 / GameVars::FRAMES_PER_SEC)) {
     if (!changed) {
       changed = get_dir(direction);
     }
   }
   move_snek(snake_list, direction);
-  set_name(snake_list);
   print_snake(snake_list);
 }
 
 bool play_again() {
   print_prompt();
-  mvprintw(ScreenVars::MAX_BOARD_Y / 2, ScreenVars::MAX_BOARD_X - 5, "Play again?");
-  mvprintw(ScreenVars::MAX_BOARD_Y / 2 + 1, ScreenVars::MAX_BOARD_X - 2, "(y/n)");
+  mvprintw(ScreenVars::MAX_BOARD_Y / 2,
+           ScreenVars::MAX_BOARD_X - 5,
+           "Play again?");
+  mvprintw(ScreenVars::MAX_BOARD_Y / 2 + 1,
+           ScreenVars::MAX_BOARD_X - 2,
+           "(y/n)");
 
   while (1) {
     char input = 0;
@@ -79,41 +83,50 @@ bool get_dir(int& direction) {
   return false;
 }
 
+std::list<Coords> create_snake() {
+  // Determine how long to make snake
+  GameVars::STARTING_LENGTH = ScreenVars::MAX_BOARD_X / 3 + 1;
+
+  // Make length of STARTING_LENGTH + 1 because last link is invisible
+  std::list<Coords> snake_list;
+  for (int i = 0; i < GameVars::STARTING_LENGTH + 1; ++i) {
+    Coords link = {1 + i, ScreenVars::MAX_BOARD_Y / 2, '!'};
+    snake_list.push_back(link);
+  }
+  set_name(snake_list);
+  return snake_list;
+}
+
 void move_snek(std::list<Coords>& snake_list, int direction) {
-  Coords coords = {snake_list.back().x, snake_list.back().y, 'S'};
+  Coords new_coord = {snake_list.back().x,
+                      snake_list.back().y,
+                      snake_list.back().symbol};
 
   if (direction == 3) {
-    if (coords.x > 0) {
-      --coords.x;
-      snake_list.push_back(coords);
-      snake_list.pop_front();
-    }
-    return;
+    --new_coord.x;
   }
   else if (direction == 1) {
-    if (coords.x < ScreenVars::MAX_BOARD_X) {
-      ++coords.x;
-      snake_list.push_back(coords);
-      snake_list.pop_front();
-    }
-    return;
+    ++new_coord.x;
   }
   else if (direction == 2) {
-    if (coords.y < ScreenVars::MAX_BOARD_Y) {
-      ++coords.y;
-      snake_list.push_back(coords);
-      snake_list.pop_front();
-    }
-    return;
+    ++new_coord.y;
   }
   else if (direction == 0) {
-    if (coords.y > 0) {
-      --coords.y;
-      snake_list.push_back(coords);
-      snake_list.pop_front();
-    }
-    return;
+    --new_coord.y;
   }
+
+  // Shift symbols back by one position
+  char symbol_pass = ' ';
+  for (auto&& coord : snake_list) {
+    char symbol_receive = symbol_pass;  // Receive symbol from prev
+    symbol_pass = coord.symbol;         // Give symbol to next
+    coord.symbol = symbol_receive;
+  }
+
+  // Must set new tail as an eraser
+  snake_list.pop_front();
+  snake_list.push_back(new_coord);
+  snake_list.front().symbol = ' ';
 }
 
 void print_snake(const std::list<Coords>& snake_list) {
@@ -123,8 +136,9 @@ void print_snake(const std::list<Coords>& snake_list) {
     mvprintw(it->y, 2 * it->x, "%c", it->symbol);
   }
 
-  // Coords
-  mvprintw(ScreenVars::MAX_BOARD_Y + 1, 0, "%d,%d\r",snake_list.back().x, snake_list.back().y);
+  // Print coords
+  // mvprintw(ScreenVars::MAX_BOARD_Y + 1, 0,
+  //          "%d,%d\r",snake_list.back().x, snake_list.back().y);
   refresh();
 }
 
@@ -133,7 +147,13 @@ void set_name(std::list<Coords>& snake_list) {
   std::list<Coords>::iterator it = snake_list.begin();
   it++->symbol = ' ';  // tail
   while (it != --snake_list.end()) {
-    it++->symbol = '#';
+    it++->symbol = '@';
   }
   it->symbol = 'X';  // head
+}
+
+void update_board(std::list<Coords> snake_list) {
+  clear();
+  print_board();
+  print_snake(snake_list);
 }
