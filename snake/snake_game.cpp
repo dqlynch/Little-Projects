@@ -6,20 +6,16 @@
 #include <list>
 #include <sys/ioctl.h>
 
+#include "Game.h"
+
 // LINUX/OS X SPECIFIC
 // WILL NOT WORK ON WINDOWS
 // REQUIRES NCURSES LIBRARY
 
-static int MAX_BOARD_X;
-static int MAX_BOARD_Y;
-static const double FRAMES_PER_SEC = 20;
-static const int STARTING_LENGTH = 20;  // must be < MAX_BOARD_X - 1
-
-struct Coords {
-  int x;
-  int y;
-  char symbol;
-};
+int GameVars::MAX_BOARD_Y;  // values assigned in set_game_size
+int GameVars::MAX_BOARD_X;
+double GameVars::FRAMES_PER_SEC = 20;
+int GameVars::STARTING_LENGTH = 20;  // must be < MAX_BOARD_X - 1
 
 // FORWARD DECLARATIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -47,20 +43,9 @@ void move_snek(std::list<Coords>& snake_list, int direction);
 // Prints current snake position
 void print_snake(const std::list<Coords>& snake_list);
 
-// Print prompt
-void print_prompt();
-
 // Sets last 5 characters of snake + eraser on the tail
 void set_name(std::list<Coords>& snake_list);
 
-// Checks for user keyboard hit (req if getch is nonblocking)
-bool kbhit();
-
-// Init all the ncurses specific stuff
-void init_ncurses();
-
-// Sets the window size and board size, return true if changed
-bool set_game_size();
 
 // MAIN - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -79,8 +64,8 @@ void run_game() {
   set_game_size();
 
   std::list<Coords> snake_list;
-  for (int i = 0; i < STARTING_LENGTH + 1; ++i) {
-    Coords link = {1 + i, MAX_BOARD_Y / 2, '#'};
+  for (int i = 0; i < GameVars::STARTING_LENGTH + 1; ++i) {
+    Coords link = {1 + i, GameVars::MAX_BOARD_Y / 2, '#'};
     snake_list.push_back(link);
   }
   set_name(snake_list);
@@ -111,8 +96,8 @@ void run_game() {
 
 bool play_again() {
   print_prompt();
-  mvprintw(MAX_BOARD_Y / 2, MAX_BOARD_X - 5, "Play again?");
-  mvprintw(MAX_BOARD_Y / 2 + 1, MAX_BOARD_X - 2, "(y/n)");
+  mvprintw(GameVars::MAX_BOARD_Y / 2, GameVars::MAX_BOARD_X - 5, "Play again?");
+  mvprintw(GameVars::MAX_BOARD_Y / 2 + 1, GameVars::MAX_BOARD_X - 2, "(y/n)");
 
   while (1) {
     char input = 0;
@@ -130,20 +115,20 @@ bool play_again() {
 }
 
 void print_board() {
-  for (int col = 1; col < 2 * MAX_BOARD_X; ++col) {
+  for (int col = 1; col < 2 * GameVars::MAX_BOARD_X; ++col) {
     mvprintw(0, col, "-");
-    mvprintw(MAX_BOARD_Y, col, "-");
+    mvprintw(GameVars::MAX_BOARD_Y, col, "-");
   }
 
-  for (int row = 1; row < MAX_BOARD_Y; ++row) {
+  for (int row = 1; row < GameVars::MAX_BOARD_Y; ++row) {
     mvprintw(row, 0, "|");
-    mvprintw(row, 2 * MAX_BOARD_X, "|");
+    mvprintw(row, 2 * GameVars::MAX_BOARD_X, "|");
   }
 }
 
 void print_prompt() {
-  int halfx = MAX_BOARD_X;
-  int halfy = MAX_BOARD_Y / 2;
+  int halfx = GameVars::MAX_BOARD_X;
+  int halfy = GameVars::MAX_BOARD_Y / 2;
   for (int i = halfx - 19; i <= halfx + 19; ++i) {
     for (int j = halfy - 4; j <= halfy + 4; ++j) {
       mvprintw(j, i, " ");
@@ -171,8 +156,8 @@ bool check_collisions(const std::list<Coords>& snake_list) {
     }
   }
   // Check wall check_collisions
-  if (head.x == 0 || head.x == MAX_BOARD_X ||
-      head.y == 0 || head.y == MAX_BOARD_Y) {
+  if (head.x == 0 || head.x == GameVars::MAX_BOARD_X ||
+      head.y == 0 || head.y == GameVars::MAX_BOARD_Y) {
     return true;
   }
   return false;
@@ -182,7 +167,7 @@ void game_frame(std::list<Coords>& snake_list, int& direction) {
   // Wait and accept up to 1 direction change
   clock_t start = clock();
   bool changed = false;
-  while( ((clock()-start) / (double) CLOCKS_PER_SEC) < (1 / FRAMES_PER_SEC)) {
+  while( ((clock()-start) / (double) CLOCKS_PER_SEC) < (1 / GameVars::FRAMES_PER_SEC)) {
     if (!changed) {
       changed = get_dir(direction);
     }
@@ -229,7 +214,7 @@ void move_snek(std::list<Coords>& snake_list, int direction) {
     return;
   }
   else if (direction == 1) {
-    if (coords.x < MAX_BOARD_X) {
+    if (coords.x < GameVars::MAX_BOARD_X) {
       ++coords.x;
       snake_list.push_back(coords);
       snake_list.pop_front();
@@ -237,7 +222,7 @@ void move_snek(std::list<Coords>& snake_list, int direction) {
     return;
   }
   else if (direction == 2) {
-    if (coords.y < MAX_BOARD_Y) {
+    if (coords.y < GameVars::MAX_BOARD_Y) {
       ++coords.y;
       snake_list.push_back(coords);
       snake_list.pop_front();
@@ -262,7 +247,7 @@ void print_snake(const std::list<Coords>& snake_list) {
   }
 
   // Coords
-  mvprintw(MAX_BOARD_Y + 1, 0, "%d,%d\r",snake_list.back().x, snake_list.back().y);
+  mvprintw(GameVars::MAX_BOARD_Y + 1, 0, "%d,%d\r",snake_list.back().x, snake_list.back().y);
   refresh();
 }
 
@@ -301,14 +286,14 @@ bool set_game_size() {
   struct winsize w;
   ioctl(0, TIOCGWINSZ, &w);
 
-  int y_save = MAX_BOARD_Y;
-  int x_save = MAX_BOARD_X;
+  int y_save = GameVars::MAX_BOARD_Y;
+  int x_save = GameVars::MAX_BOARD_X;
 
-  MAX_BOARD_Y = w.ws_row - 1;
-  MAX_BOARD_X = (w.ws_col / 2) - 1;
+  GameVars::MAX_BOARD_Y = w.ws_row - 1;
+  GameVars::MAX_BOARD_X = (w.ws_col / 2) - 1;
 
-  if (y_save != MAX_BOARD_Y ||
-      x_save != MAX_BOARD_X) {
+  if (y_save != GameVars::MAX_BOARD_Y ||
+      x_save != GameVars::MAX_BOARD_X) {
     // Only resize term if window size changed
     resizeterm(w.ws_row, w.ws_col);
     return true;
