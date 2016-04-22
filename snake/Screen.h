@@ -1,7 +1,7 @@
 // Contains general game functions and constants for terminal games
 // like snake and bmtron
-#ifndef GAME_H
-#define GAME_H
+#ifndef SCREEN_H
+#define SCREEN_H
 
 #include <iostream>
 #include <cmath>
@@ -9,16 +9,15 @@
 #include <ncurses.h>
 #include <sys/ioctl.h>  // for get window size
 
-class GameVars {
+// Static class to hold board dimensions
+class ScreenVars {
 public:
   static int MAX_BOARD_Y;
   static int MAX_BOARD_X;
-  static double FRAMES_PER_SEC;
-  static int STARTING_LENGTH;
 
 private:
   // Private default constructor to prevent any creation of instances
-  GameVars() {}
+  ScreenVars() {}
 };
 
 struct Coords {
@@ -38,5 +37,8 @@ bool kbhit();
 
 // Print prompt
 void print_prompt();
+
+// Prints the board borders
+void print_board();
 
 #endif

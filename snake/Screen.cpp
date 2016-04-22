@@ -1,6 +1,5 @@
 // Implementation of Game.h for terminal game-general functions
-
-#include "Game.h"
+#include "Screen.h"
 
 void init_ncurses() {
   initscr();
@@ -16,14 +15,14 @@ bool set_game_size() {
   struct winsize w;
   ioctl(0, TIOCGWINSZ, &w);
 
-  int y_save = GameVars::MAX_BOARD_Y;
-  int x_save = GameVars::MAX_BOARD_X;
+  int y_save = ScreenVars::MAX_BOARD_Y;
+  int x_save = ScreenVars::MAX_BOARD_X;
 
-  GameVars::MAX_BOARD_Y = w.ws_row - 1;
-  GameVars::MAX_BOARD_X = (w.ws_col / 2) - 1;
+  ScreenVars::MAX_BOARD_Y = w.ws_row - 1;
+  ScreenVars::MAX_BOARD_X = (w.ws_col / 2) - 1;
 
-  if (y_save != GameVars::MAX_BOARD_Y ||
-      x_save != GameVars::MAX_BOARD_X) {
+  if (y_save != ScreenVars::MAX_BOARD_Y ||
+      x_save != ScreenVars::MAX_BOARD_X) {
     // Only resize term if window size changed
     resizeterm(w.ws_row, w.ws_col);
     return true;
@@ -43,8 +42,8 @@ bool kbhit() {
 }
 
 void print_prompt() {
-  int halfx = GameVars::MAX_BOARD_X;
-  int halfy = GameVars::MAX_BOARD_Y / 2;
+  int halfx = ScreenVars::MAX_BOARD_X;
+  int halfy = ScreenVars::MAX_BOARD_Y / 2;
   for (int i = halfx - 19; i <= halfx + 19; ++i) {
     for (int j = halfy - 4; j <= halfy + 4; ++j) {
       mvprintw(j, i, " ");
@@ -57,5 +56,17 @@ void print_prompt() {
   for (int i = halfy - 4; i <= halfy + 4; ++i) {
     mvprintw(i, halfx - 20, "|");
     mvprintw(i, halfx + 20, "|");
+  }
+}
+
+void print_board() {
+  for (int col = 1; col < 2 * ScreenVars::MAX_BOARD_X; ++col) {
+    mvprintw(0, col, "-");
+    mvprintw(ScreenVars::MAX_BOARD_Y, col, "-");
+  }
+
+  for (int row = 1; row < ScreenVars::MAX_BOARD_Y; ++row) {
+    mvprintw(row, 0, "|");
+    mvprintw(row, 2 * ScreenVars::MAX_BOARD_X, "|");
   }
 }

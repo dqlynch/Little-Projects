@@ -1,127 +1,5 @@
-#include <iostream>
-#include <ncurses.h>
-#include <ctime>
-#include <list>
-
-#include "Game.h"
-
-// LINUX/OS X SPECIFIC
-// WILL NOT WORK ON WINDOWS
-// REQUIRES NCURSES LIBRARY
-
-int GameVars::MAX_BOARD_Y;  // values assigned in set_game_size
-int GameVars::MAX_BOARD_X;
-double GameVars::FRAMES_PER_SEC = 20;
-int GameVars::STARTING_LENGTH = 20;  // must be < MAX_BOARD_X - 1
-
-// FORWARD DECLARATIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-// Runs game
-void run_game();
-
-// Asks player whether they want to play again or exits game
-bool play_again();
-
-// Prints the board borders
-void print_board();
-
-// Checks whether snek has collided into anything
-bool check_collisions(const std::list<Coords>& snake_list);
-
-// Executes one game frame
-void game_frame(std::list<Coords>& snake_list, int& direction);
-
-// Change direction of snake, can't change to opposite
-bool get_dir(int& direction);
-
-// Increments snake position according to dircetion
-void move_snek(std::list<Coords>& snake_list, int direction);
-
-// Prints current snake position
-void print_snake(const std::list<Coords>& snake_list);
-
-// Sets last 5 characters of snake + eraser on the tail
-void set_name(std::list<Coords>& snake_list);
-
-
-// MAIN - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-int main() {
-  init_ncurses();
-
-  run_game();
-
-  endwin();
-}
-
-// FUNCTION IMPLEMENTATIONS - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-void run_game() {
-
-  set_game_size();
-
-  std::list<Coords> snake_list;
-  for (int i = 0; i < GameVars::STARTING_LENGTH + 1; ++i) {
-    Coords link = {1 + i, GameVars::MAX_BOARD_Y / 2, '#'};
-    snake_list.push_back(link);
-  }
-  set_name(snake_list);
-  clear();
-  print_board();
-  print_snake(snake_list);
-
-  // Wait for initial direction input
-  int direction = 1;
-  while(!get_dir(direction)) {
-    if (set_game_size()) {
-      clear();
-      print_board();
-      print_snake(snake_list);
-    }
-  }
-
-  while(!check_collisions(snake_list)) {
-    game_frame(snake_list, direction);
-  }
-  if (!play_again()) {
-    return;
-  }
-  else {
-    run_game();
-  }
-}
-
-bool play_again() {
-  print_prompt();
-  mvprintw(GameVars::MAX_BOARD_Y / 2, GameVars::MAX_BOARD_X - 5, "Play again?");
-  mvprintw(GameVars::MAX_BOARD_Y / 2 + 1, GameVars::MAX_BOARD_X - 2, "(y/n)");
-
-  while (1) {
-    char input = 0;
-    if (kbhit()) {
-      input = getch();
-    }
-
-    if (input == 'y' || input == 'Y') {
-      return true;
-    }
-    if (input == 'n' || input == 'N') {
-      return false;
-    }
-  }
-}
-
-void print_board() {
-  for (int col = 1; col < 2 * GameVars::MAX_BOARD_X; ++col) {
-    mvprintw(0, col, "-");
-    mvprintw(GameVars::MAX_BOARD_Y, col, "-");
-  }
-
-  for (int row = 1; row < GameVars::MAX_BOARD_Y; ++row) {
-    mvprintw(row, 0, "|");
-    mvprintw(row, 2 * GameVars::MAX_BOARD_X, "|");
-  }
-}
+// Implementation of Snake_Game.h snake-specific functions
+#include "Snake_Game.h"
 
 bool check_collisions(const std::list<Coords>& snake_list) {
   // Only need to check head
@@ -134,9 +12,9 @@ bool check_collisions(const std::list<Coords>& snake_list) {
       return true;
     }
   }
-  // Check wall check_collisions
-  if (head.x == 0 || head.x == GameVars::MAX_BOARD_X ||
-      head.y == 0 || head.y == GameVars::MAX_BOARD_Y) {
+  // Check wall collisions
+  if (head.x == 0 || head.x == ScreenVars::MAX_BOARD_X ||
+      head.y == 0 || head.y == ScreenVars::MAX_BOARD_Y) {
     return true;
   }
   return false;
@@ -154,6 +32,26 @@ void game_frame(std::list<Coords>& snake_list, int& direction) {
   move_snek(snake_list, direction);
   set_name(snake_list);
   print_snake(snake_list);
+}
+
+bool play_again() {
+  print_prompt();
+  mvprintw(ScreenVars::MAX_BOARD_Y / 2, ScreenVars::MAX_BOARD_X - 5, "Play again?");
+  mvprintw(ScreenVars::MAX_BOARD_Y / 2 + 1, ScreenVars::MAX_BOARD_X - 2, "(y/n)");
+
+  while (1) {
+    char input = 0;
+    if (kbhit()) {
+      input = getch();
+    }
+
+    if (input == 'y' || input == 'Y') {
+      return true;
+    }
+    if (input == 'n' || input == 'N') {
+      return false;
+    }
+  }
 }
 
 bool get_dir(int& direction) {
@@ -193,7 +91,7 @@ void move_snek(std::list<Coords>& snake_list, int direction) {
     return;
   }
   else if (direction == 1) {
-    if (coords.x < GameVars::MAX_BOARD_X) {
+    if (coords.x < ScreenVars::MAX_BOARD_X) {
       ++coords.x;
       snake_list.push_back(coords);
       snake_list.pop_front();
@@ -201,7 +99,7 @@ void move_snek(std::list<Coords>& snake_list, int direction) {
     return;
   }
   else if (direction == 2) {
-    if (coords.y < GameVars::MAX_BOARD_Y) {
+    if (coords.y < ScreenVars::MAX_BOARD_Y) {
       ++coords.y;
       snake_list.push_back(coords);
       snake_list.pop_front();
@@ -226,7 +124,7 @@ void print_snake(const std::list<Coords>& snake_list) {
   }
 
   // Coords
-  mvprintw(GameVars::MAX_BOARD_Y + 1, 0, "%d,%d\r",snake_list.back().x, snake_list.back().y);
+  mvprintw(ScreenVars::MAX_BOARD_Y + 1, 0, "%d,%d\r",snake_list.back().x, snake_list.back().y);
   refresh();
 }
 
