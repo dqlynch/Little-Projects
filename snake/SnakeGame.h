@@ -54,6 +54,8 @@ void move_snek(SnakeInfo& snake);
 // Prints current snake position
 void print_snake(const SnakeInfo& snake);
 
+std::string pick_fruit_message();
+
 // Generates a fruit at random location that snake doesn't currently occupy
 void generate_fruit(SnakeInfo& snake);
 

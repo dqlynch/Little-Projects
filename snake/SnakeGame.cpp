@@ -46,7 +46,6 @@ bool play_again(SnakeInfo snake) {
   print_play_again_prompt();
 
   while (1) {
-
     char input = 0;
     if (kbhit()) {
       input = getch();
@@ -57,8 +56,8 @@ bool play_again(SnakeInfo snake) {
         return false;
       }
     }
-
     if (set_game_size()) {
+      snake.fruit.symbol = ' ';   // hide symbol
       update_board(snake);
       print_play_again_prompt();
     }
@@ -182,6 +181,14 @@ void print_snake(const SnakeInfo& snake) {
   // mvprintw(ScreenVars::MAX_BOARD_Y - 1, 0,
   //          "%d,%d\r",snake.list.back().y, snake.list.back().x);
   refresh();
+}
+
+std::string pick_fruit_message() {
+  std::string messages[] = {"SNAKE", "THEREISNOWINCONDITION", "FRUIT",
+                            "MICHIGAN", "DQLYNCH", "SNEK", "SECRETMESSAGE",
+                            "IFYOUCANREADTHISITSTOOLATE", "LOOKBEHINDYOU"};
+  int random = rand() % (sizeof(messages)/sizeof(messages[0]));
+  return messages[random];
 }
 
 void generate_fruit(SnakeInfo& snake) {

@@ -44,6 +44,7 @@ void start_new_game() {
 
   // Wait for user to start game
   get_init_direction(snake);
+  generate_fruit(snake);
   move_snek(snake);
   print_snake(snake);
 
@@ -62,12 +63,12 @@ void run_game(SnakeInfo& snake) {
 
 SnakeInfo set_up_new_game() {
   set_game_size();
-  Coords temp_fruit = {0, 0, '!'};
+  Coords temp_fruit = {0, 0, ' '};
+  std::string fruit_message = pick_fruit_message();
 
   //                list, direction, fruit, fruit_word, fruit_word_index
   // index starts at -1 because it must be incremented before printing
-  SnakeInfo snake = {create_snake(), 1, temp_fruit, "SNAKE", -1};
-  generate_fruit(snake);
+  SnakeInfo snake = {create_snake(), 1, temp_fruit, fruit_message, -1};
   update_board(snake);
   return snake;
 }
