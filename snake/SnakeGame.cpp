@@ -185,8 +185,9 @@ void print_snake(const SnakeInfo& snake) {
 
 std::string pick_fruit_message() {
   std::string messages[] = {"SNAKE", "THEREISNOWINCONDITION", "FRUIT",
-                            "MICHIGAN", "DQLYNCH", "SNEK", "SECRETMESSAGE",
-                            "IFYOUCANREADTHISITSTOOLATE", "LOOKBEHINDYOU"};
+                            "MICHIGAN", "#", "SNEK", "SECRETMESSAGE",
+                            "IFYOUCANREADTHISITSTOOLATE", "LOOKBEHINDYOU",
+                            "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"};
   int random = rand() % (sizeof(messages)/sizeof(messages[0]));
   return messages[random];
 }
