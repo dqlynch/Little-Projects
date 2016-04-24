@@ -2,6 +2,7 @@
 #include "Screen.h"
 
 void init_ncurses() {
+  srand(time(NULL));
   initscr();
   curs_set(0);
   cbreak();
